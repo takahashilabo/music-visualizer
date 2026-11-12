@@ -61,6 +61,25 @@ similar). To run it anyway:
 The first time it starts, macOS will ask for permission to record system
 audio — that's this app requesting the tap, not a microphone. Allow it.
 
+## Troubleshooting
+
+**The window shows the pattern, but it never reacts to music.** This
+almost always means the system audio permission isn't actually granted,
+even though the visual still renders (it just has no real audio feeding
+it). Check **System Settings → Privacy & Security → Screen & System Audio
+Recording**, and make sure MusicVisualizer is listed there and enabled. If
+you toggle it, quit the app (menu bar icon → Quit) and reopen it.
+
+If it's building/running from more than one location (e.g. a copy built
+from source alongside a copy installed from the `.dmg`), macOS may treat
+each as a separate entry in that list because their code signatures
+differ — check that the specific copy you're running is the one that's
+enabled.
+
+If MusicVisualizer doesn't show up in that list at all, you likely missed
+or dismissed the permission prompt on first launch. Delete the app, empty
+the Trash, and reinstall from the `.dmg` so the prompt fires again.
+
 ## Building from source
 
 This is a Swift Package Manager project — no Xcode project file needed, but
