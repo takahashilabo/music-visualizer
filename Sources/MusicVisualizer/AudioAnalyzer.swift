@@ -157,7 +157,13 @@ final class AudioAnalyzer {
         }
         previousMagnitudes = magnitudes
 
-        fluxEnvelope = fluxEnvelope * 0.93 + flux * 0.07
+        // A fast-adapting threshold re-calibrates to "whatever the song is
+        // doing right now" within under a second, which quietly erases beat
+        // salience over a long listening session (a sustained loud/busy
+        // passage raises the bar until even real beats stop clearing it).
+        // Slowing this to a several-second time constant keeps the bar
+        // closer to a song-level average instead of a moment-level one.
+        fluxEnvelope = fluxEnvelope * 0.985 + flux * 0.015
         let threshold = fluxEnvelope * 1.8 + 0.01
         if flux > threshold {
             beatPulse = 1.0
@@ -198,7 +204,7 @@ final class AudioAnalyzer {
     /// just collapses to ~1 all the time regardless of the music.
     private func relativeEnergy(_ raw: Float, slow: inout Float, fast: inout Float) -> Float {
         if slow <= 0.0001 { slow = raw }
-        slow = slow * 0.995 + raw * 0.005
+        slow = slow * 0.998 + raw * 0.002
         fast = fast * 0.45 + raw * 0.55
         let safeSlow = max(slow, 0.0001)
         let ratio = fast / safeSlow

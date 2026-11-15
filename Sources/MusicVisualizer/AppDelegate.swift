@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var analyzer: AudioAnalyzer?
     private var renderer: GeometricRenderer?
     private let mtkView = MTKView()
+    private var textOverlay: TextOverlayView?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         panel = VisualizerPanel()
@@ -41,6 +42,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if renderer == nil {
             print("[GeometricRenderer] failed to initialize — no Metal device/pipeline?")
         }
+
+        let overlay = TextOverlayView(analyzer: analyzer)
+        textOverlay = overlay
+        panel.embedVisualization(overlay)
     }
 
     private static func monoSamples(from bufferList: AudioBufferList, channels: Int) -> [Float] {

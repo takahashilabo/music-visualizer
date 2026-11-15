@@ -61,6 +61,10 @@ similar). To run it anyway:
 The first time it starts, macOS will ask for permission to record system
 audio — that's this app requesting the tap, not a microphone. Allow it.
 
+**Updating to a new version later will ask again** — see
+[Troubleshooting](#troubleshooting) below if the visualizer stops reacting
+to sound after an update; it's expected, not a bug.
+
 ## Troubleshooting
 
 **The window shows the pattern, but it never reacts to music.** This
@@ -70,11 +74,31 @@ it). Check **System Settings → Privacy & Security → Screen & System Audio
 Recording**, and make sure MusicVisualizer is listed there and enabled. If
 you toggle it, quit the app (menu bar icon → Quit) and reopen it.
 
-If it's building/running from more than one location (e.g. a copy built
-from source alongside a copy installed from the `.dmg`), macOS may treat
-each as a separate entry in that list because their code signatures
-differ — check that the specific copy you're running is the one that's
-enabled.
+**This also happens from a plain `.dmg` install, not just building from
+source — most commonly when you update to a newer release.** This app is
+ad-hoc code-signed (no paid Apple Developer certificate), and any build
+whose contents differ at all from the previous one — including a new
+version you just downloaded and installed — gets a different code
+signature (its CDHash changes along with its content), even though the
+bundle identifier and file path stay exactly the same. macOS's Screen &
+System Audio Recording permission appears to be tied to that exact
+signature, not just the bundle ID/path — so updating to a new version
+silently invalidates whatever grant you gave the old one. The Settings
+toggle can still *look* like it's on, because it's showing the stale grant
+for the previous version, not telling you it no longer matches what's
+actually installed.
+
+The fix every time this happens (first install, and again after every
+update): open **Screen & System Audio Recording**, remove the existing
+MusicVisualizer entry entirely (select it, click `-` — don't just toggle
+it off and on), relaunch the app, and grant the permission prompt fresh.
+This friction is specific to unsigned/ad-hoc builds like this one; a
+release signed with a paid Developer ID + notarization wouldn't have it.
+
+**If you have more than one copy installed** (e.g. a `.dmg`-installed copy
+in `/Applications` alongside one built from source elsewhere), macOS may
+also track each file path as a separate entry, so make sure you're
+granting permission for the specific copy you're actually running.
 
 If MusicVisualizer doesn't show up in that list at all, you likely missed
 or dismissed the permission prompt on first launch. Delete the app, empty

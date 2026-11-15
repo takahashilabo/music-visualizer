@@ -68,6 +68,22 @@ echo "Built $APP_BUNDLE"
 
 if [ "${1:-}" == "run" ]; then
   echo "Relaunching..."
-  pkill -f "$APP_BUNDLE/Contents/MacOS/$APP_NAME" 2>/dev/null || true
-  open "$APP_BUNDLE"
+  # Kill ANY running copy of this app, wherever it lives (e.g. a
+  # /Applications install from a .dmg) — Launch Services resolving a
+  # relative `open` by bundle identifier can otherwise reopen a *different*
+  # on-disk copy than the one just built here, silently testing stale code.
+  pkill -f "/$APP_NAME.app/Contents/MacOS/$APP_NAME" 2>/dev/null || true
+  # Give Core Audio time to fully tear down the previous process's system
+  # audio tap / aggregate device before the new process creates its own.
+  # Launching immediately after pkill can win a race where the new tap is
+  # created while the old one is still unwinding, silently delivering no
+  # real audio (no error — just a visual that never reacts to sound).
+  for _ in $(seq 1 20); do
+    pgrep -f "/$APP_NAME.app/Contents/MacOS/$APP_NAME" >/dev/null 2>&1 || break
+    sleep 0.1
+  done
+  sleep 1
+  # Absolute path: unambiguously launches *this* bundle, not whatever copy
+  # Launch Services might otherwise resolve the bundle identifier to.
+  open "$(pwd)/$APP_BUNDLE"
 fi
